@@ -16,9 +16,12 @@
 }
 
 #background {
-    background-color: blanchedalmond;
+  background-color: blanchedalmond;
 }
 
-#picstyle {
-    border:5px solid black
+#vert-image {
+  width: 225px;
+  height: 300px;
+  border:5px solid black;
+  line-height:50px;;
 }
