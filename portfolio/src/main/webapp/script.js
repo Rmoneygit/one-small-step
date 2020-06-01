@@ -13,25 +13,21 @@
 // limitations under the License.
 
 /**
- * Adds a random greeting to the page.
- */
-function addRandomGreeting() {
-  const greetings =
-      ['Don\'t be evil.', 'Sei nicht böse.', 'No seas malo.', '悪事をしない。'];
-
-  // Pick a random greeting.
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-
-  // Add it to the page.
-  const greetingContainer = document.getElementById('greeting-container');
-  greetingContainer.innerText = greeting;
-}
-
-/**
  * Fetches JSON message from DataServlet.
  */
-function getMessage() {
-  fetch('/data').then(response => response.text()).then((message) => {
-      document.getElementById("message-container").innerText = message;
+function getComments() {
+  fetch('/data').then(response => response.json()).then((comments) => {
+      // Build the list of comment entries.
+      const commentEl = document.getElementById('comment-section');
+      comments.forEach((comment) => {
+        commentEl.appendChild(createListElement(comment));
+      });
   });
+}
+
+/** Creates an <li> element containing text. */
+function createListElement(text) {
+  const liElement = document.createElement('li');
+  liElement.innerText = text;
+  return liElement;
 }

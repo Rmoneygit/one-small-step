@@ -22,25 +22,30 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+/** Servlet that returns comment data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
+
+  ArrayList<String> comments = new ArrayList<String>();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-    //create and populate animals ArrayList
-    ArrayList<String> animals = new ArrayList<String>();
-    animals.add("Bear");
-    animals.add("Pig");
-    animals.add("Goat");
+    //Convert comments ArrayList to JSON.
+    String json = convertToJsonUsingGson(comments);
 
-    //Convert animals ArrayList to JSON
-    String json = convertToJsonUsingGson(animals);
-
-    // Send the JSON as the response
+    // Send the JSON as the response.
     response.setContentType("application/json;");
     response.getWriter().println(json);
+  }
+
+  @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String commentText = request.getParameter("comment-input");
+    String commentName = request.getParameter("name-input");
+
+    comments.add(commentName + ": \"" + commentText + "\"");
+    response.sendRedirect("/index.html");
   }
 
   /**
