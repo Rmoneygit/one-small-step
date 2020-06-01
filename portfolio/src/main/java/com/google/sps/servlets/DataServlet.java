@@ -14,6 +14,8 @@
 
 package com.google.sps.servlets;
 
+import java.util.ArrayList;
+import com.google.gson.Gson;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -26,7 +28,28 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;");
-    response.getWriter().println("Hello Ryan!");
+
+    //create and populate animals ArrayList
+    ArrayList<String> animals = new ArrayList<String>();
+    animals.add("Bear");
+    animals.add("Pig");
+    animals.add("Goat");
+
+    //Convert animals ArrayList to JSON
+    String json = convertToJsonUsingGson(animals);
+
+    // Send the JSON as the response
+    response.setContentType("application/json;");
+    response.getWriter().println(json);
+  }
+
+  /**
+   * Converts an ArrayList of Strings into a JSON string using the Gson library. Note: We first added
+   * the Gson library dependency to pom.xml.
+   */
+  private String convertToJsonUsingGson(ArrayList<String> strings) {
+    Gson gson = new Gson();
+    String json = gson.toJson(strings);
+    return json;
   }
 }
