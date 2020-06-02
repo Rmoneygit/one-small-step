@@ -30,10 +30,7 @@ public class DataServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
     //create and populate animals ArrayList
-    ArrayList<String> animals = new ArrayList<String>();
-    animals.add("Bear");
-    animals.add("Pig");
-    animals.add("Goat");
+    ArrayList<String> animals = new ArrayList {"Bear", "Pig", "Goat"};
 
     //Convert animals ArrayList to JSON
     String json = convertToJsonUsingGson(animals);
