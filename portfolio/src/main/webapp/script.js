@@ -27,6 +27,9 @@ function addRandomGreeting() {
   greetingContainer.innerText = greeting;
 }
 
+/**
+ * Fetches JSON message from DataServlet.
+ */
 function getMessage() {
   fetch('/data').then(response => response.text()).then((message) => {
       document.getElementById("message-container").innerText = message;
