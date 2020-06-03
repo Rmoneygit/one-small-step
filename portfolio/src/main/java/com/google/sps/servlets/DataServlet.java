@@ -30,7 +30,6 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
     //Convert comments ArrayList to JSON.
     String json = convertToJsonUsingGson(comments);
 
@@ -47,7 +46,7 @@ public class DataServlet extends HttpServlet {
     comments.add(commentName + ": \"" + commentText + "\"");
     response.sendRedirect("/index.html");
   }
-
+  
   /**
    * Converts an ArrayList of Strings into a JSON string using the Gson library. Note: We first added
    * the Gson library dependency to pom.xml.
