@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body id="background" onload="getMessage()">
+  <body id="background" onload="getComments()">
     <div id="content">
       <h1>My Portfolio</h1>
       <p>This is Ryan's portfolio.</p>
@@ -39,7 +39,25 @@
       <h2>Blog Posts</h2>
       <ul>
           <li><a href="blog-1-german.html">German Language Blog 🇩🇪</a></li>
-      </ul> 
+      </ul>
+      <br>
+      <br>
+      <div>------------------------------------------------------<div>
+
+      <h3>Comment on this Page</h3>
+      <form action="/data" method="POST">
+        <label for="name-input">Name:</label>
+        <textarea id="name-input" name="name-input" rows="1" cols="25">Anonymous</textarea>
+        <br>
+        <p>Comment:</p>
+        <textarea name="comment-input" rows="4" cols="50"></textarea>
+        <br>
+        <input type="submit" />
+      </form>
+
+      <h3>Comment List:</h3>
+      <ul id="comment-section"></ul>
+
     </div>
   </body>
 </html>

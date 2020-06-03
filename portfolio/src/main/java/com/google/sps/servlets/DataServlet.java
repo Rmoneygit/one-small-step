@@ -22,24 +22,31 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+/** Servlet that returns comment data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
+  ArrayList<String> comments = new ArrayList<String>();
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    //Convert comments ArrayList to JSON.
+    String json = convertToJsonUsingGson(comments);
 
-    //create and populate animals ArrayList
-    ArrayList<String> animals = new ArrayList {"Bear", "Pig", "Goat"};
-
-    //Convert animals ArrayList to JSON
-    String json = convertToJsonUsingGson(animals);
-
-    // Send the JSON as the response
+    // Send the JSON as the response.
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }
 
+  @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String commentText = request.getParameter("comment-input");
+    String commentName = request.getParameter("name-input");
+
+    comments.add(commentName + ": \"" + commentText + "\"");
+    response.sendRedirect("/index.html");
+  }
+  
   /**
    * Converts an ArrayList of Strings into a JSON string using the Gson library. Note: We first added
    * the Gson library dependency to pom.xml.
