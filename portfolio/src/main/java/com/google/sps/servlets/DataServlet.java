@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
+  ArrayList<String> comments = new ArrayList<String>();
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     //Query all comments from Datastore.
@@ -72,6 +74,11 @@ public class DataServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
+    response.sendRedirect("/index.html");
+    String commentText = request.getParameter("comment-input");
+    String commentName = request.getParameter("name-input");
+
+    comments.add(commentName + ": \"" + commentText + "\"");
     response.sendRedirect("/index.html");
   }
 }
