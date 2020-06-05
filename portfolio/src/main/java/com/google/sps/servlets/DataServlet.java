@@ -36,13 +36,13 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //Query all comments from Datastore.
+    // Query all comments from Datastore.
     Query query = new Query("Comment").addSort("timestamp", SortDirection.ASCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
 
-    //Fill commentEntries arrayList with data from Datastore.
+    // Fill commentEntries arrayList with data from Datastore.
     ArrayList<String> commentEntries = new ArrayList<String>();
     for (Entity entity : results.asIterable()) {
       String commentName = (String) entity.getProperty("name");
@@ -60,7 +60,7 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //Create a new Comment entity with data from the request.
+    // Create a new Comment entity with data from the request.
     String commentText = request.getParameter("comment-input");
     String commentName = request.getParameter("name-input");
     long timestamp = System.currentTimeMillis();
@@ -70,15 +70,10 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("name", commentName);
     commentEntity.setProperty("timestamp", timestamp);
 
-    //Store the Comment entity in Datastore.
+    // Store the Comment entity in Datastore.
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
-    response.sendRedirect("/index.html");
-    String commentText = request.getParameter("comment-input");
-    String commentName = request.getParameter("name-input");
-
-    comments.add(commentName + ": \"" + commentText + "\"");
     response.sendRedirect("/index.html");
   }
 }
