@@ -16,13 +16,23 @@
  * Fetches JSON message from DataServlet.
  */
 function getComments() {
-  fetch('/data').then(response => response.json()).then((comments) => {
+  // Get the max amount of comments allowed
+  const maxComments = document.getElementById('comment-quantity').value;
+
+  fetch('/data?comments=' + maxComments).then(response => response.json()).then((comments) => {
       // Build the list of comment entries.
       const commentEl = document.getElementById('comment-section');
+      commentEl.innerHTML = '';
       comments.forEach((comment) => {
         commentEl.appendChild(createListElement(comment));
       });
   });
+}
+
+/** Deletes all comments */
+function deleteComments() {
+  const request = new Request('/delete-data', {method: 'POST'});
+  fetch(request).then(getComments());
 }
 
 /** Creates an <li> element containing text. */

@@ -34,13 +34,13 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //Query all comments from Datastore.
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.ASCENDING);
+    // Query all comments from Datastore.
+    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
 
-    //Fill commentEntries arrayList with data from Datastore.
+    // Fill commentEntries arrayList with data from Datastore.
     ArrayList<String> commentEntries = new ArrayList<String>();
     for (Entity entity : results.asIterable()) {
       String commentName = (String) entity.getProperty("name");
@@ -49,7 +49,13 @@ public class DataServlet extends HttpServlet {
       commentEntries.add(commentEntry);
     }
 
-    //Convert to JSON and send it as the response.
+    // Trim commentEntries arrayList to be under the max comment amount.
+    int maxComments = Integer.parseInt(request.getParameter("comments"));
+    if(commentEntries.size() > maxComments) {
+      commentEntries.subList(maxComments, commentEntries.size()).clear();
+    }
+
+    // Convert to JSON and send it as the response.
     Gson gson = new Gson();
 
     response.setContentType("application/json;");
@@ -58,7 +64,7 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //Create a new Comment entity with data from the request.
+    // Create a new Comment entity with data from the request.
     String commentText = request.getParameter("comment-input");
     String commentName = request.getParameter("name-input");
     long timestamp = System.currentTimeMillis();
@@ -68,7 +74,7 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("name", commentName);
     commentEntity.setProperty("timestamp", timestamp);
 
-    //Store the Comment entity in Datastore.
+    // Store the Comment entity in Datastore.
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
