@@ -56,7 +56,10 @@
       </form>
 
       <h3>Comment List:</h3>
+      <label for="comment-quantity">Max Comments Displayed:</label>
+      <input type="number" id="comment-quantity" name="comment-quantity" value="3" min="1" max="30" onchange="getComments()">
       <ul id="comment-section"></ul>
+      <button onclick="deleteComments()">Clear All Comments</button>
 
     </div>
   </body>

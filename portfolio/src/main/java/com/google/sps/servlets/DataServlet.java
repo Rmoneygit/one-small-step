@@ -37,7 +37,7 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Query all comments from Datastore.
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.ASCENDING);
+    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
@@ -51,7 +51,13 @@ public class DataServlet extends HttpServlet {
       commentEntries.add(commentEntry);
     }
 
-    //Convert to JSON and send it as the response.
+    // Trim commentEntries arrayList to be under the max comment amount.
+    int maxComments = Integer.parseInt(request.getParameter("comments"));
+    if(commentEntries.size() > maxComments) {
+      commentEntries.subList(maxComments, commentEntries.size()).clear();
+    }
+
+    // Convert to JSON and send it as the response.
     Gson gson = new Gson();
 
     response.setContentType("application/json;");
