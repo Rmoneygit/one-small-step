@@ -45,15 +45,19 @@
       <div>------------------------------------------------------<div>
 
       <h3>Comment on this Page</h3>
-      <form action="/data" method="POST">
-        <label for="name-input">Name:</label>
-        <textarea id="name-input" name="name-input" rows="1" cols="25">Anonymous</textarea>
-        <br>
-        <p>Comment:</p>
-        <textarea name="comment-input" rows="4" cols="50"></textarea>
-        <br>
-        <input type="submit" />
-      </form>
+      <div id="hidden">
+        <form action="/data" method="POST">
+          <label for="name-input">Name:</label>
+          <textarea id="name-input" name="name-input" rows="1" cols="25">Anonymous</textarea>
+          <br>
+          <p>Comment:</p>
+          <textarea name="comment-input" rows="4" cols="50"></textarea>
+          <br>
+          <input type="submit" />
+        </form>
+      </div>
+
+      <p id="login-link"></p>
 
       <h3>Comment List:</h3>
       <label for="comment-quantity">Max Comments Displayed:</label>

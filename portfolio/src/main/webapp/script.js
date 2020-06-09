@@ -16,6 +16,8 @@
  * Fetches JSON message from DataServlet.
  */
 function getComments() {
+  determineVisibleItems()
+
   // Get the max amount of comments allowed
   const maxComments = document.getElementById('comment-quantity').value;
 
@@ -40,4 +42,22 @@ function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;
   return liElement;
+}
+
+/** Chooses what to display based on login status */
+function determineVisibleItems() {
+  fetch('/login').then(response => response.json()).then(loginInfo => {
+    const linkEl = document.getElementById('login-link');
+
+    // If the user is logged in
+    if(loginInfo.status) {
+      // Unhide comments
+      document.getElementById('hidden').style.display = 'block';
+      linkEl.innerHTML = 'You are currently logged in with your Google account. Log out <a href=\"' + loginInfo.url + '\">here</a>.';
+    }
+    // If the user is not logged in
+    else {
+      linkEl.innerHTML = 'Login <a href=\"' + loginInfo.url + '\">here</a> to post a comment.';
+    }
+  });
 }
