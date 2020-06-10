@@ -16,6 +16,8 @@ package com.google.sps.servlets;
 
 import java.util.ArrayList;
 import com.google.gson.Gson;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -46,6 +48,9 @@ public class DataServlet extends HttpServlet {
     ArrayList<String> commentEntries = new ArrayList<String>();
     for (Entity entity : results.asIterable()) {
       String commentName = (String) entity.getProperty("name");
+      if(commentName.isEmpty()) {
+        commentName = (String) entity.getProperty("email");
+      }
       String commentText = (String) entity.getProperty("text");
       String commentEntry = commentName + ": \"" + commentText + "\"";
       commentEntries.add(commentEntry);
@@ -66,14 +71,18 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    UserService userService = UserServiceFactory.getUserService();
+
     // Create a new Comment entity with data from the request.
     String commentText = request.getParameter("comment-input");
     String commentName = request.getParameter("name-input");
+    String userEmail = userService.getCurrentUser().getEmail();
     long timestamp = System.currentTimeMillis();
 
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("text", commentText);
     commentEntity.setProperty("name", commentName);
+    commentEntity.setProperty("email", userEmail);
     commentEntity.setProperty("timestamp", timestamp);
 
     // Store the Comment entity in Datastore.
