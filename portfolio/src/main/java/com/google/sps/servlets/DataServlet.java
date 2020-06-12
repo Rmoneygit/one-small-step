@@ -65,7 +65,7 @@ public class DataServlet extends HttpServlet {
     // Convert to JSON and send it as the response.
     Gson gson = new Gson();
 
-    response.setContentType("application/json;");
+    response.setContentType("application/json");
     response.getWriter().println(gson.toJson(commentEntries));
   }
 

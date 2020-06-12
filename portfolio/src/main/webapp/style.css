@@ -33,6 +33,6 @@
   line-height:50px;
 }
 
-#comment-form {
+.hidden {
   display: none;
 }

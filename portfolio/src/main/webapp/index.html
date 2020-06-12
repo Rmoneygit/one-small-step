@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body id="background" onload="determineVisibleItems()">
+  <body id="background" onload="getComments()">
     <div id="content">
       <h1>My Portfolio</h1>
       <p>This is Ryan's portfolio.</p>
@@ -45,17 +45,15 @@
       <div>------------------------------------------------------<div>
 
       <h3>Comment on this Page</h3>
-      <div id="comment-form">
-        <form action="/data" method="POST">
-          <label for="name-input">Name:</label>
-          <textarea id="name-input" name="name-input" rows="1" cols="25"></textarea>
-          <br>
-          <p>Comment:</p>
-          <textarea name="comment-input" rows="4" cols="50"></textarea>
-          <br>
-          <input type="submit" />
-        </form>
-      </div>
+      <form id="comment-form" class="hidden" action="/data" method="POST">
+        <label for="name-input">Name:</label>
+        <textarea id="name-input" name="name-input" rows="1" cols="25">Anonymous</textarea>
+        <br>
+        <p>Comment:</p>
+        <textarea name="comment-input" rows="4" cols="50"></textarea>
+        <br>
+        <input type="submit" />
+      </form>
 
       <p id="login-link"></p>
 

@@ -16,6 +16,8 @@
  * Fetches JSON message from DataServlet.
  */
 function getComments() {
+  determineVisibleItems();
+
   // Get the max amount of comments allowed.
   const maxComments = document.getElementById('comment-quantity').value;
 
@@ -49,9 +51,8 @@ function determineVisibleItems() {
 
     // If the user is logged in, unhide comment form.
     if(loginInfo.status) {
-      document.getElementById('comment-form').style.display = 'block';
+      document.getElementById('comment-form').classList.remove('hidden');
       linkEl.innerHTML = 'You are currently logged in with your Google account. Log out <a href=\"' + loginInfo.url + '\">here</a>.';
-      getComments();
     }
     // If the user is not logged in, comment form remains hidden.
     else {
