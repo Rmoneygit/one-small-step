@@ -45,7 +45,7 @@
       <div>------------------------------------------------------<div>
 
       <h3>Comment on this Page</h3>
-      <form action="/data" method="POST">
+      <form id="comment-form" class="hidden" action="/data" method="POST">
         <label for="name-input">Name:</label>
         <textarea id="name-input" name="name-input" rows="1" cols="25">Anonymous</textarea>
         <br>
@@ -54,6 +54,8 @@
         <br>
         <input type="submit" />
       </form>
+
+      <p id="login-link"></p>
 
       <h3>Comment List:</h3>
       <label for="comment-quantity">Max Comments Displayed:</label>

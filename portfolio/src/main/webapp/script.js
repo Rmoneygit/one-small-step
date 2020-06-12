@@ -16,7 +16,9 @@
  * Fetches JSON message from DataServlet.
  */
 function getComments() {
-  // Get the max amount of comments allowed
+  determineVisibleItems();
+
+  // Get the max amount of comments allowed.
   const maxComments = document.getElementById('comment-quantity').value;
 
   fetch('/data?comments=' + maxComments).then(response => response.json()).then((comments) => {
@@ -29,7 +31,7 @@ function getComments() {
   });
 }
 
-/** Deletes all comments */
+/** Deletes all comments. */
 function deleteComments() {
   const request = new Request('/delete-data', {method: 'POST'});
   fetch(request).then(getComments());
@@ -40,4 +42,21 @@ function createListElement(text) {
   const liElement = document.createElement('li');
   liElement.innerText = text;
   return liElement;
+}
+
+/** Chooses what to display upon loading based on login status. */
+function determineVisibleItems() {
+  fetch('/login').then(response => response.json()).then(loginInfo => {
+    const linkEl = document.getElementById('login-link');
+
+    // If the user is logged in, unhide comment form.
+    if(loginInfo.status) {
+      document.getElementById('comment-form').classList.remove('hidden');
+      linkEl.innerHTML = 'You are currently logged in with your Google account. Log out <a href=\"' + loginInfo.url + '\">here</a>.';
+    }
+    // If the user is not logged in, comment form remains hidden.
+    else {
+      linkEl.innerHTML = 'Login <a href=\"' + loginInfo.url + '\">here</a> to post a comment.';
+    }
+  });
 }
