@@ -16,8 +16,6 @@
  * Fetches JSON message from DataServlet.
  */
 function getComments() {
-  determineVisibleItems();
-
   // Get the max amount of comments allowed.
   const maxComments = document.getElementById('comment-quantity').value;
 
@@ -26,7 +24,14 @@ function getComments() {
       const commentEl = document.getElementById('comment-section');
       commentEl.innerHTML = '';
       comments.forEach((comment) => {
-        commentEl.appendChild(createListElement(comment));
+        // Add the comment entry's text.
+        commentEl.appendChild(createListElement(comment.entry));
+        // If there is an image attached to the comment, display it.
+        if(comment.imageUrl != null) {
+          var image = document.createElement('IMG');
+          image.src = comment.imageUrl;
+          commentEl.appendChild(image);
+        }
       });
   });
 }
@@ -58,5 +63,13 @@ function determineVisibleItems() {
     else {
       linkEl.innerHTML = 'Login <a href=\"' + loginInfo.url + '\">here</a> to post a comment.';
     }
+  });
+}
+
+/** Fetches and sets the upload url for images in the comment form. */
+function fetchBlobstoreUrl() {
+  fetch('/image-upload-url').then(response => response.text()).then(imageUploadUrl => {
+    const commentForm = document.getElementById('comment-form');
+    commentForm.action = imageUploadUrl;
   });
 }

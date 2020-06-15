@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
-  <body id="background" onload="getComments()">
+  <body id="background" onload="determineVisibleItems(); fetchBlobstoreUrl(); getComments();">
     <div id="content">
       <h1>My Portfolio</h1>
       <p>This is Ryan's portfolio.</p>
@@ -45,12 +45,16 @@
       <div>------------------------------------------------------<div>
 
       <h3>Comment on this Page</h3>
-      <form id="comment-form" class="hidden" action="/data" method="POST">
+      <form id="comment-form" class="hidden" method="POST" enctype="multipart/form-data">
         <label for="name-input">Name:</label>
-        <textarea id="name-input" name="name-input" rows="1" cols="25">Anonymous</textarea>
+        <textarea id="name-input" name="name-input" rows="1" cols="25"></textarea>
         <br>
         <p>Comment:</p>
         <textarea name="comment-input" rows="4" cols="50"></textarea>
+        <br>
+        <label for="image-upload">Upload an image:</label>
+        <input id="image-upload" type="file" name="image-upload"></input>
+        <br>
         <br>
         <input type="submit" />
       </form>
