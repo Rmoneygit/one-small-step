@@ -15,93 +15,136 @@
 package com.google.sps;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Iterator;
 
 public final class FindMeetingQuery {
-  /*
-  * Goal: Return a collection of free time ranges
-  * Free time ranges: time ranges where no meeting attendees have an event scheduled,
-  * and it is long enough to conduct the whole meeting.
-  *
-  **/
+  /**
+    * Purpose: To return a collection of free time ranges
+    * Free time ranges are time ranges where no meeting attendees have an event scheduled,
+    * and it is long enough to conduct the whole meeting.
+    */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
     ArrayList<TimeRange> ranges = new ArrayList<TimeRange>();
-    ArrayList<Event> eventList = new ArrayList<Event>(events);
-    Collection<String> attendees = request.getAttendees();
 
-    // Removes all events that are fully contained within another event.
-    if(eventList.size() > 1) {
-      for(int i = 1; i < eventList.size(); i++) {
-        if(eventList.get(i - 1).getWhen().contains(eventList.get(i).getWhen())) {
-          eventList.remove(i);
-        }
-      }
+
+    // If the meeting duration is longer than a day, return no ranges.
+    if(request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
+      return ranges;
     }
 
-    // Remove all events that have no attendees that are in the meeting we're trying to schedule.
-    for(int i = 0; i < eventList.size(); i++) {
-      ArrayList<String> eventAttendees = new ArrayList(eventList.get(i).getAttendees());
-      boolean hasAtLeastOneAttendeeInCommon = false;
-
-      for(String attendee: attendees) {
-        if(eventAttendees.contains(attendee)) {
-          hasAtLeastOneAttendeeInCommon = true;
-        }
-      }
-      if(!hasAtLeastOneAttendeeInCommon) {
-        eventList.remove(i);
-      }
-    }
-
-    // If there are no events left, and the meeting is less than 24 hours long...
-    if(eventList.isEmpty() && request.getDuration() < TimeRange.WHOLE_DAY.duration()) {
-      // ...allow the whole day.
+    // If no events exists, return the whole day as the range.
+    if(events.isEmpty()) {
       ranges.add(TimeRange.WHOLE_DAY);
+      return ranges;
     }
 
-    // Go through all events and populate "ranges" with periods of free time that have no meetings for any attendees.
-    for(int i = 0; i < eventList.size(); i++) {
-      int start;
-      int end;
+    // Determine if there is at least one attendee for any event.
+    boolean attendeesExist = false;
+    for (Event event:events) {
+      if (!event.getAttendees().isEmpty()) {
+        attendeesExist = true;
+        break;
+      }
+    }
 
-      // Looking at the first event.
-      if(i == 0) {
+    // If no event has any attendees, return the whole day as the range.
+    if (!attendeesExist) {
+      ranges.add(TimeRange.WHOLE_DAY);
+      return ranges;
+    }
+
+    // Trim the event list
+    ArrayList<Event> trimmedEvents = trimEvents(events, request, request.getAttendees());
+    // If trimmedEvents is empty, it means that no events have any attendees in common with the meeting.
+    if(trimmedEvents.isEmpty()) {
+      ranges.add(TimeRange.WHOLE_DAY);
+      return ranges;
+    }
+
+    // Return the ranges of time during which the meeting can take place.
+    ranges = getRanges(trimmedEvents, request);
+    return ranges;
+  }
+
+  /**
+   * Provide available meeting time ranges.
+   */
+  public ArrayList<TimeRange> getRanges(ArrayList<Event> events, MeetingRequest request) {
+    ArrayList<TimeRange> ranges = new ArrayList<TimeRange>();
+    int start = 0;
+    int end = 0;
+    int duration = (int) request.getDuration();
+
+    /** Sort the events in chronological order.
+      * This is required for the following algorithm to work properly.
+      */
+    Collections.sort(events, Event.ORDER_BY_START);
+
+    for(int i = 0; i < events.size(); i++) {
+      // Case 1: The first event.
+      if (i == 0) {
         start = TimeRange.START_OF_DAY;
-        end = eventList.get(i).getWhen().start();
-        if(end - start >= request.getDuration()) {
+        end = events.get(i).getWhen().start();
+        if(start < end && start + duration <= end) {
           ranges.add(TimeRange.fromStartEnd(start, end, false));
         }
       }
-
-      // Looking at any event in between
-      if(i > 0 && i < eventList.size() - 1) {
-        start = eventList.get(i - 1).getWhen().end();
-        end = eventList.get(i + 1).getWhen().start();
-
-        if(end - start >= request.getDuration()) {
+      // Case 2: An event in the middle.
+      else {
+        start = events.get(i - 1).getWhen().end();
+        end = events.get(i).getWhen().start();
+        if(start < end && start + duration <= end) {
           ranges.add(TimeRange.fromStartEnd(start, end, false));
         }
       }
-
-      // Looking at the last event.
-      if(i == eventList.size() - 1) {
-        if(i != 0) {
-          start = eventList.get(i - 1).getWhen().end();
-          end = eventList.get(i).getWhen().start();
-          if(end - start >= request.getDuration()) {
-            ranges.add(TimeRange.fromStartEnd(start, end, false));
-          }
-        }
-
-        start = eventList.get(i).getWhen().end();
+      // Case 3: The last event.
+      if (i == events.size() - 1) {
+        start = events.get(i).getWhen().end();
         end = TimeRange.END_OF_DAY;
-        if(end - start >= request.getDuration()) {
+        if(start < end && start + duration <= end) {
           ranges.add(TimeRange.fromStartEnd(start, end, true));
         }
       }
-    } 
-    return ranges;
     }
+    return ranges;
   }
 
+  // Create a new list with only the events we should consider.
+  public ArrayList<Event> trimEvents(Collection<Event> eventCollection, MeetingRequest request, Collection<String> attendeesCollection) {
+    ArrayList<Event> events = new ArrayList<Event>(eventCollection);
+    ArrayList<Event> trimmedEvents = new ArrayList<Event>();
+    HashSet meetingAttendees = new HashSet(attendeesCollection);
+
+    for(int i = 0; i < events.size(); i++) {
+      Iterator<String> it = events.get(i).getAttendees().iterator();
+      boolean hasOneCommonAttendee = false;
+
+      // Only consider this event if it has attendees in common with our meeting.
+      while(it.hasNext()) {
+        if(meetingAttendees.contains(it.next())) {
+          hasOneCommonAttendee = true;
+        }
+      }
+
+      if(hasOneCommonAttendee) {
+        /** Only insert the event if it isn't fully contained by the previous event.
+          *  We can safely do this now, beacuse all the events with no attendees have
+          *  been removed.
+          */
+        if(i > 0) {
+          if(!trimmedEvents.get(i - 1).getWhen().contains(events.get(i).getWhen())) {
+            trimmedEvents.add(i, events.get(i));
+          }
+        }
+        else {
+          trimmedEvents.add(i, events.get(i));
+        }
+      }
+    }
+    return trimmedEvents;
+  }
+}
