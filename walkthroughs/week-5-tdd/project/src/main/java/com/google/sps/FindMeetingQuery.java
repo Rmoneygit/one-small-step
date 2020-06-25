@@ -27,14 +27,20 @@ public final class FindMeetingQuery {
     * Free time ranges are time ranges where no meeting attendees have an event scheduled,
     * and it is long enough to conduct the whole meeting.
     */
-  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+  public Collection<TimeRange> query(Collection<Event> eventCollection, MeetingRequest request) {
     ArrayList<TimeRange> ranges = new ArrayList<TimeRange>();
+    ArrayList<Event> events = new ArrayList<Event>(eventCollection);
 
 
     // If the meeting duration is longer than a day, return no ranges.
     if(request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       return ranges;
     }
+
+    /** Sort the events in chronological order.
+      * This is required for the following algorithms to work properly.
+      */
+    Collections.sort(events, Event.ORDER_BY_START);
 
     // If no events exists, return the whole day as the range.
     if(events.isEmpty()) {
@@ -79,11 +85,6 @@ public final class FindMeetingQuery {
     int end = 0;
     int duration = (int) request.getDuration();
 
-    /** Sort the events in chronological order.
-      * This is required for the following algorithm to work properly.
-      */
-    Collections.sort(events, Event.ORDER_BY_START);
-
     for(int i = 0; i < events.size(); i++) {
       // Case 1: The first event.
       if (i == 0) {
@@ -114,8 +115,7 @@ public final class FindMeetingQuery {
   }
 
   // Create a new list with only the events we should consider.
-  public ArrayList<Event> trimEvents(Collection<Event> eventCollection, MeetingRequest request, Collection<String> attendeesCollection) {
-    ArrayList<Event> events = new ArrayList<Event>(eventCollection);
+  public ArrayList<Event> trimEvents(ArrayList<Event> events, MeetingRequest request, Collection<String> attendeesCollection) {
     ArrayList<Event> trimmedEvents = new ArrayList<Event>();
     HashSet meetingAttendees = new HashSet(attendeesCollection);
 
@@ -135,13 +135,13 @@ public final class FindMeetingQuery {
           *  We can safely do this now, beacuse all the events with no attendees have
           *  been removed.
           */
-        if(i > 0) {
-          if(!trimmedEvents.get(i - 1).getWhen().contains(events.get(i).getWhen())) {
-            trimmedEvents.add(i, events.get(i));
+        if(trimmedEvents.isEmpty()) {
+          trimmedEvents.add(events.get(i));
           }
-        }
         else {
-          trimmedEvents.add(i, events.get(i));
+          if(!trimmedEvents.get(trimmedEvents.size() - 1).getWhen().contains(events.get(i).getWhen())) {
+          trimmedEvents.add(events.get(i));
+          }
         }
       }
     }
