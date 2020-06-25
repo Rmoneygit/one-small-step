@@ -27,8 +27,9 @@ public final class FindMeetingQuery {
     * Free time ranges are time ranges where no meeting attendees have an event scheduled,
     * and it is long enough to conduct the whole meeting.
     */
-  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+  public Collection<TimeRange> query(Collection<Event> eventCollection, MeetingRequest request) {
     ArrayList<TimeRange> ranges = new ArrayList<TimeRange>();
+    ArrayList<Event> events = new ArrayList<Event>(eventCollection);
 
 
     // If the meeting duration is longer than a day, return no ranges.
@@ -57,16 +58,34 @@ public final class FindMeetingQuery {
       return ranges;
     }
 
+    /** Sort the events in chronological order.
+      * This is required for the following algorithms to work properly.
+      */
+    Collections.sort(events, Event.ORDER_BY_START);
+
     // Trim the event list
     ArrayList<Event> trimmedEvents = trimEvents(events, request, request.getAttendees());
-    // If trimmedEvents is empty, it means that no events have any attendees in common with the meeting.
-    if(trimmedEvents.isEmpty()) {
+
+    // Now consider ALL attendees, mandatory and optional.
+    ArrayList<String> allAttendees = new ArrayList<String>(request.getAttendees());
+    allAttendees.addAll(request.getOptionalAttendees());
+    ArrayList<Event> allTrimmedEvents = trimEvents(events, request, allAttendees);
+
+    // If allTrimmedEvents is empty, it means that no events have any attendees in common with the meeting.
+    if(allTrimmedEvents.isEmpty()) {
       ranges.add(TimeRange.WHOLE_DAY);
       return ranges;
     }
 
     // Return the ranges of time during which the meeting can take place.
-    ranges = getRanges(trimmedEvents, request);
+
+    ranges = getRanges(allTrimmedEvents, request);
+    /** If no meeting times are possible when considering optional attendees,
+      * return meeting times for only mandatory attendees.
+      */
+    if(ranges.isEmpty()) {
+      ranges = getRanges(trimmedEvents, request);
+    }
     return ranges;
   }
 
@@ -78,11 +97,6 @@ public final class FindMeetingQuery {
     int start = 0;
     int end = 0;
     int duration = (int) request.getDuration();
-
-    /** Sort the events in chronological order.
-      * This is required for the following algorithm to work properly.
-      */
-    Collections.sort(events, Event.ORDER_BY_START);
 
     for(int i = 0; i < events.size(); i++) {
       // Case 1: The first event.
@@ -114,8 +128,7 @@ public final class FindMeetingQuery {
   }
 
   // Create a new list with only the events we should consider.
-  public ArrayList<Event> trimEvents(Collection<Event> eventCollection, MeetingRequest request, Collection<String> attendeesCollection) {
-    ArrayList<Event> events = new ArrayList<Event>(eventCollection);
+  public ArrayList<Event> trimEvents(ArrayList<Event> events, MeetingRequest request, Collection<String> attendeesCollection) {
     ArrayList<Event> trimmedEvents = new ArrayList<Event>();
     HashSet meetingAttendees = new HashSet(attendeesCollection);
 
@@ -130,18 +143,19 @@ public final class FindMeetingQuery {
         }
       }
 
+
       if(hasOneCommonAttendee) {
-        /** Only insert the event if it isn't fully contained by the previous event.
-          *  We can safely do this now, beacuse all the events with no attendees have
-          *  been removed.
-          */
-        if(i > 0) {
-          if(!trimmedEvents.get(i - 1).getWhen().contains(events.get(i).getWhen())) {
-            trimmedEvents.add(i, events.get(i));
-          }
+      /** Only insert the event if it isn't fully contained by the previous event.
+        *  We can safely do this now, beacuse all the events with no attendees have
+        *  been removed.
+        */
+        if(trimmedEvents.isEmpty()) {
+          trimmedEvents.add(events.get(i));
         }
         else {
-          trimmedEvents.add(i, events.get(i));
+          if(!trimmedEvents.get(trimmedEvents.size() - 1).getWhen().contains(events.get(i).getWhen())) {
+          trimmedEvents.add(events.get(i));
+          }
         }
       }
     }
